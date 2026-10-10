@@ -12,4 +12,5 @@
 !program.hex
 !*.py
 !*.s
+!*.nxdc
 build/

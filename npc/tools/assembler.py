@@ -105,6 +105,19 @@ def encode_instruction(line_number, pc, line, labels):
 
         return ((0b10 << 6) | (rd << 4) | (s << 2) | imm)
 
+    if mnemonic in ("in", "out"):
+        check_oprand_count(mnemonic, operands, 2, line_number)
+
+        register = parse_register(operands[0], line_number)
+        idx = parse_number(operands[1], line_number)
+        if not 0 <= idx <= 7:
+            raise ValueError(
+                f"line {line_number}: I/O index must be 0-7, got {idx}"
+            )
+
+        io_write = 1 if mnemonic == "out" else 0
+        return ((0b01 << 6) | (register << 4) | (io_write << 3) | idx)
+
     if mnemonic == "bner0":
         check_oprand_count(mnemonic, operands, 2, line_number)
 
