@@ -1,4 +1,7 @@
-li r0, 10
+li r0, 2
+li r3, 8
+add r0, r0, r3
+
 li r1, 1
 li r2, 0
 li r3, 1

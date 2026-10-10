@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     clock_cycle(context, dut);
     print_state(cycle, dut);
 
-    if (dut.pc_monitor == 6) {
+    if (dut.pc_monitor == 8) {
       reached_halt = true;
       break;
     }
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     return 1;
   }
   clock_cycle(context, dut);
-  if(dut.pc_monitor != 6) {
+  if(dut.pc_monitor != 8) {
     std::fprintf(
       stderr, "FAIL: halt instruction did not keep pc at 5\n"
     );
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     return 1;
   }
   
-  std::printf("PASS: PC = 5, R0 = 12, R1 = 3, R2 = 12, R3 = 0\n");
+  std::printf("PASS: PC = 8, R0 = 10, R1 = 10, R2 = 55, R3 = 1\n");
   dut.final();
   return 0;
 }

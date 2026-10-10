@@ -56,6 +56,24 @@ def parse_number(token, line_number):
             f"line {line_number}: invalid number '{token}'"
         )from None
 
+def encode_li_immediate(value, line_number):
+    if not 0 <= value <= 255:
+        raise ValueError(
+            f"line {line_number}: li value must be 0-255, got {value}"
+        )
+    for s in range(4):
+        shift = s << 1
+        imm = value >> shift
+
+        if 0 <= imm <= 3 and (imm << shift) == value :
+            return s, imm
+
+    raise ValueError(
+        f"line {line_number}: value {value} cannot be represented "
+        "by one li instruction"
+    )
+
+
 def check_oprand_count(mnemonic, operands, expected, line_number):
     if len(operands) != expected:
         raise ValueError(
@@ -63,7 +81,7 @@ def check_oprand_count(mnemonic, operands, expected, line_number):
             f"{expected} oprands, got {len(operands)}"
         )
 
-def encode_instruction(line_number, line, labels):
+def encode_instruction(line_number, pc, line, labels):
     tokens = line.replace(",", " ").split()
 
     mnemonic = tokens[0].lower()
@@ -82,14 +100,10 @@ def encode_instruction(line_number, line, labels):
         check_oprand_count(mnemonic, operands, 2, line_number)
 
         rd = parse_register(operands[0], line_number)
-        immediate = parse_number(operands[1], line_number)
+        value = parse_number(operands[1], line_number)
+        s, imm = encode_li_immediate(value, line_number)
 
-        if not 0 <= immediate <= 15 :
-            raise ValueError(
-                f"line {line_number}: li immediate must be 0-15, "
-                f"got {immediate}"
-            )
-        return ((0b10 << 6) | (rd << 4) |immediate)
+        return ((0b10 << 6) | (rd << 4) | (s << 2) | imm)
 
     if mnemonic == "bner0":
         check_oprand_count(mnemonic, operands, 2, line_number)
@@ -98,16 +112,16 @@ def encode_instruction(line_number, line, labels):
         target_text = operands[1]
 
         if target_text in labels:
-            target = labels[target_text]
+            offset = labels[target_text] - pc
         else:
-            target = parse_number(target_text, line_number)
+            offset = parse_number(target_text, line_number)
 
-        if not 0 <= target <= 15:
+        if not -8 <= offset <= 7:
             raise ValueError(
-                f"line {line_number}: branch target must be 0-15, "
-                f"got {target}"
+                f"line {line_number}: branch target must be -8 to 7, "
+                f"got {offset}"
             )
-        return ((0b11 << 6) | (target << 2) | rs)
+        return ((0b11 << 6) | ((offset & 0xF)  << 2) | rs)
     raise ValueError(
         f"line {line_number}: unknown instruction '{mnemonic}'"
     )
@@ -116,7 +130,7 @@ def second_pass(labels, instructions):
     encoded = []
 
     for line_number, pc, line in instructions:
-        machine_code = encode_instruction(line_number, line, labels)
+        machine_code = encode_instruction(line_number, pc, line, labels)
 
         encoded.append((pc, machine_code, line))
 
