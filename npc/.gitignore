@@ -9,4 +9,7 @@
 !*.cpp
 !.gitignore
 !README.md
+!program.hex
+!*.py
+!*.s
 build/
