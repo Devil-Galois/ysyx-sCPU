@@ -60,7 +60,7 @@ $(NV_BIN): $(VSRCS) $(NV_MAIN) $(NV_BIND) $(NVBOARD_ARCHIVE)
 	--Mdir $(NV_OBJ_DIR) \
 	-CFLAGS "-I$(NVBOARD_HOME)/usr/include $(CXXFLAGS)" \
 	$(VSRCS) $(NV_MAIN) $(NV_BIND) \
-	-LDFLAGS "$(NVBOARD_ARCHIVE) $(LDFLAGS) \
+	-LDFLAGS "$(NVBOARD_ARCHIVE) $(LDFLAGS)" \
 	-o $@
 
 nvboard-run: $(NV_BIN) $(NV_PROGRAM)
